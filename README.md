@@ -60,5 +60,3 @@ A Chrome extension that tracks all URL changes on the current page, logs the tim
 - `tabs`: To access tab information
 - `<all_urls>`: To track URLs on all websites
 
-## License
-MIT
