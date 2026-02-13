@@ -60,3 +60,7 @@ A Chrome extension that tracks all URL changes on the current page, logs the tim
 - `tabs`: To access tab information
 - `<all_urls>`: To track URLs on all websites
 
+
+## Legal
+This project is available under the Apache 2.0 License.
+Copyright 202 Expedia, Inc.
