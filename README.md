@@ -13,6 +13,9 @@ A Chrome extension that tracks all URL changes on the current page, logs the tim
   - Green for new query parameters
   - Yellow for updated parameters
   - Red strikethrough for removed parameters
+  <img width="686" height="848" alt="Screenshot 2026-03-03 at 17 44 59" src="https://github.com/user-attachments/assets/0e73a563-fbe2-427f-bad7-b5365b43fa1e" />
+
+
 - **DevTools Panel** - Full-screen view integrated into Chrome DevTools
 - **Toolbar Popup** - Quick access from extension icon
 - Individual URL deletion with × button
