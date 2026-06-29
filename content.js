@@ -8,12 +8,16 @@ function trackUrlChange(newUrl) {
   const elapsed = now - lastTimestamp;
 
   // Send to background script which has access to tab ID
-  chrome.runtime.sendMessage({
-    type: 'URL_CHANGE',
-    url: newUrl,
-    timestamp: now,
-    elapsedMs: elapsed
-  });
+  try {
+    chrome.runtime.sendMessage({
+      type: 'URL_CHANGE',
+      url: newUrl,
+      timestamp: now,
+      elapsedMs: elapsed
+    }, () => { void chrome.runtime.lastError; });
+  } catch (_) {
+    // Extension context invalidated (e.g. after reload); nothing to do
+  }
 
   lastTimestamp = now;
   currentUrl = newUrl;

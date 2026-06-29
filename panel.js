@@ -16,131 +16,6 @@ limitations under the License.
 
 // Panel script to display URL history in DevTools
 
-function formatTime(ms) {
-  if (ms < 1000) {
-    return `${ms}ms`;
-  } else if (ms < 60000) {
-    return `${(ms / 1000).toFixed(2)}s`;
-  } else {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = ((ms % 60000) / 1000).toFixed(0);
-    return `${minutes}m ${seconds}s`;
-  }
-}
-
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp);
-  return date.toLocaleTimeString();
-}
-
-function parseUrlComponents(urlString) {
-  try {
-    const url = new URL(urlString);
-    const params = {};
-    url.searchParams.forEach((value, key) => {
-      params[key] = value;
-    });
-
-    return {
-      protocol: url.protocol,
-      host: url.host,
-      pathname: url.pathname,
-      params: params,
-      hash: url.hash
-    };
-  } catch (e) {
-    return null;
-  }
-}
-
-function highlightPathDifferences(currentPath, previousPath) {
-  if (currentPath === previousPath) {
-    return currentPath;
-  }
-
-  // Split paths into segments
-  const currentSegments = currentPath.split('/');
-  const previousSegments = previousPath.split('/');
-
-  let result = '';
-  const maxLength = Math.max(currentSegments.length, previousSegments.length);
-
-  for (let i = 0; i < maxLength; i++) {
-    const currentSeg = currentSegments[i] || '';
-    const previousSeg = previousSegments[i] || '';
-
-    if (i > 0) result += '/';
-
-    if (currentSeg !== previousSeg) {
-      result += `<span class="diff-path">${currentSeg}</span>`;
-    } else {
-      result += currentSeg;
-    }
-  }
-
-  return result;
-}
-
-function highlightQueryDifferences(currentParams, previousParams) {
-  if (Object.keys(currentParams).length === 0 && Object.keys(previousParams).length === 0) {
-    return '';
-  }
-
-  const allKeys = new Set([...Object.keys(currentParams), ...Object.keys(previousParams)]);
-  const parts = [];
-
-  allKeys.forEach(key => {
-    const currentValue = currentParams[key];
-    const previousValue = previousParams[key];
-
-    if (currentValue !== undefined && previousValue === undefined) {
-      // New parameter - green
-      parts.push(`<span class="diff-new">${key}=${currentValue}</span>`);
-    } else if (currentValue === undefined && previousValue !== undefined) {
-      // Removed parameter - red strikethrough
-      parts.push(`<span class="diff-removed">${key}=${previousValue}</span>`);
-    } else if (currentValue !== previousValue) {
-      // Updated parameter - yellow
-      parts.push(`<span class="diff-updated">${key}=${currentValue}</span>`);
-    } else {
-      // Unchanged
-      parts.push(`${key}=${currentValue}`);
-    }
-  });
-
-  return parts.length > 0 ? '?' + parts.join('&') : '';
-}
-
-function formatUrlWithDiff(currentUrl, previousUrl) {
-  const current = parseUrlComponents(currentUrl);
-  const previous = previousUrl ? parseUrlComponents(previousUrl) : null;
-
-  if (!current) {
-    return currentUrl;
-  }
-
-  // If no previous URL or different domain, show URL without highlighting
-  if (!previous || current.host !== previous.host) {
-    return currentUrl;
-  }
-
-  // Same domain - highlight differences
-  let result = `${current.protocol}//${current.host}`;
-
-  // Highlight path differences
-  result += highlightPathDifferences(current.pathname, previous.pathname);
-
-  // Highlight query parameter differences
-  result += highlightQueryDifferences(current.params, previous.params);
-
-  // Add hash if present
-  if (current.hash) {
-    result += current.hash;
-  }
-
-  return result;
-}
-
 function displayUrlHistory() {
   // Get the current tab ID from DevTools
   const tabId = chrome.devtools.inspectedWindow.tabId;
@@ -176,7 +51,9 @@ function displayUrlHistory() {
               <span class="url-elapsed">(+${formatTime(entry.elapsedMs)})</span>
             </div>
             <div class="url-header-right">
-              <button class="open-btn" data-url="${entry.url}" title="Open in new tab">→</button>
+              <button class="copy-btn" data-url="${entry.url}" title="Copy URL">${ICON_COPY}</button>
+              <button class="navigate-btn" data-url="${entry.url}" title="Navigate to URL">${ICON_NAVIGATE}</button>
+              <button class="new-tab-btn" data-url="${entry.url}" title="Open in new tab">${ICON_NEW_TAB}</button>
               <button class="delete-btn" data-index="${originalIndex}" title="Remove this URL">×</button>
             </div>
           </div>
@@ -195,11 +72,21 @@ function displayUrlHistory() {
       });
     });
 
-    // Add event listeners to open buttons
-    document.querySelectorAll('.open-btn').forEach(btn => {
+    document.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        const url = this.getAttribute('data-url');
-        window.open(url, '_blank');
+        navigator.clipboard.writeText(this.getAttribute('data-url'));
+      });
+    });
+
+    document.querySelectorAll('.navigate-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        chrome.tabs.update(tabId, { url: this.getAttribute('data-url') });
+      });
+    });
+
+    document.querySelectorAll('.new-tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        chrome.tabs.create({ url: this.getAttribute('data-url') });
       });
     });
   });

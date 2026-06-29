@@ -132,20 +132,25 @@ button:hover {
   font-weight: 500;
 }
 
-.open-btn {
+.copy-btn,
+.navigate-btn,
+.new-tab-btn {
   background: transparent;
   border: 1px solid #e0e0e0;
   color: #666;
-  font-size: 16px;
   line-height: 1;
-  padding: 2px 8px;
+  padding: 4px 8px;
   min-width: auto;
   border-radius: 3px;
   transition: all 0.2s;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
 }
 
-.open-btn:hover {
+.copy-btn:hover,
+.navigate-btn:hover,
+.new-tab-btn:hover {
   background: #e3f2fd;
   color: #1976d2;
   border-color: #1976d2;
